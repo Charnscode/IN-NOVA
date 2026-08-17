@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Arial', system-ui, sans-serif;
+  background-color: #F8FAFC;
+  color: #1E293B;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+
+/* Animations fluides */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50%      { transform: translateY(-16px) translateX(8px); }
+}
+@keyframes pulseSoft {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 0.9; }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-float-slow {
+  animation: floatSlow 7s ease-in-out infinite;
+}
+.animate-pulse-soft {
+  animation: pulseSoft 4s ease-in-out infinite;
+}
+
+button, a {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, opacity 0.25s ease;
+}
+button:active {
+  transform: scale(0.97);
+}
+
+.page-transition {
+  animation: pageEnter 0.45s cubic-bezier(0.22,1,0.36,1);
+}
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Micro-interactions supplementaires */
+.hover-grow { transition: transform 0.3s cubic-bezier(0.22,1,0.36,1); }
+.hover-grow:hover { transform: scale(1.03); }
+
+@keyframes spinSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.animate-spin-slow { animation: spinSlow 12s linear infinite; }
+
+@keyframes bounceIn {
+  0%   { opacity:0; transform: scale(0.85); }
+  60%  { opacity:1; transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+.animate-bounce-in { animation: bounceIn 0.5s cubic-bezier(0.22,1,0.36,1); }
