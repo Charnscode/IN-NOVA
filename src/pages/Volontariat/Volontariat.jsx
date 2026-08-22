@@ -4,6 +4,7 @@ import { Laptop, GraduationCap, LineChart, HeartHandshake, Sprout, Smartphone,
   Trophy, Users, FileText, Rocket, Bell, CheckCircle2 } from 'lucide-react'
 import Reveal from '../../components/Reveal'
 import { sanitize, isValidEmail } from '../../utils/security'
+import { dejaSoumis, enregistrerSoumission } from '../../utils/registre'
 
 const MISSIONS = [
   { Icon: Laptop,         titre: 'Support Digital',       desc: "Aide à la gestion des réseaux sociaux, création de contenus et communication digitale du Club." },
@@ -44,6 +45,11 @@ export default function Volontariat() {
     if (!form.domaine)             err.domaine    = 'Choisissez un domaine'
     if (!form.motivation.trim())   err.motivation = 'Motivation requise'
     if (Object.keys(err).length > 0) { setErrors(err); return }
+    if (dejaSoumis('innova_candidatures_volontariat', form.email)) {
+      setErrors(x => ({ ...x, email: 'Vous avez déjà soumis une candidature avec cet email.' }))
+      return
+    }
+    enregistrerSoumission('innova_candidatures_volontariat', form.email)
     setOk(true)
     // TODO Phase 2 : POST /api/volunteers/ { ...form }
     // + envoi email a clubinnova08@gmail.com

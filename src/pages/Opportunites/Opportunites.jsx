@@ -3,10 +3,11 @@ import { useState, useEffect, useRef } from 'react'
 import { Search, Pin, Calendar, Banknote, Info, MapPin, Clock, X, Radio } from 'lucide-react'
 import AdBanner from '../../components/AdBanner'
 import Reveal from '../../components/Reveal'
-import { OPPORTUNITES, TYPES, TYPE_STYLES } from '../../data/opportunites'
+import { getOpportunites, TYPES, TYPE_STYLES } from '../../data/opportunites'
 import { sanitize, isValidEmail } from '../../utils/security'
 
 export default function Opportunites() {
+  const OPPORTUNITES = getOpportunites()
   const [filtre,  setFiltre]  = useState('Tous')
   const [search,  setSearch]  = useState('')
   const [email,   setEmail]   = useState('')

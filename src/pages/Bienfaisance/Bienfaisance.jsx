@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Gift, FileText, HeartHandshake, GraduationCap, ShoppingBag, Target, Rocket, Star, CheckCircle2 } from 'lucide-react'
 import Reveal from '../../components/Reveal'
 import { sanitize, isValidEmail } from '../../utils/security'
+import { dejaSoumis, enregistrerSoumission } from '../../utils/registre'
 
 const ACTIONS = [
   { Icon: Gift,           titre: 'Dons et Ressources',       desc: "Collecte et redistribution de ressources matérielles et financières pour les femmes commerçantes en difficulté." },
@@ -34,6 +35,11 @@ export default function Bienfaisance() {
     if (!form.tel.trim())          err.tel     = 'Téléphone requis'
     if (!form.activite.trim())     err.activite= 'Décrivez votre activité'
     if (Object.keys(err).length > 0) { setErrors(err); return }
+    if (dejaSoumis('innova_demandes_bienfaisance', form.email)) {
+      setErrors(x => ({ ...x, email: 'Une demande a déjà été envoyée avec cet email.' }))
+      return
+    }
+    enregistrerSoumission('innova_demandes_bienfaisance', form.email)
     setOk(true)
     // TODO Phase 2 : POST /api/bienfaisance/request/ { ...form }
     // + email a clubinnova08@gmail.com

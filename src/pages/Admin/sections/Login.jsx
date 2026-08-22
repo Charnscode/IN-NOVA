@@ -1,35 +1,52 @@
 // src/pages/Admin/sections/Login.jsx
 import { useState } from 'react'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ShieldAlert } from 'lucide-react'
 import Reveal from '../../../components/Reveal'
 import { sanitize, isValidEmail } from '../../../utils/security'
-import { validatePassword, passwordStrengthLabel } from '../../../utils/validatePassword'
+import { sha256Hex } from '../../../utils/hash'
 
 export const PROFILS = [
-  { id:'innova',   nom:'In-NOVA',   sousTitre:'Bureau général du Club', logo:'/logos/innova.jpg',   couleur:'#0066CC' },
-  { id:'technova',  nom:'TechNOVA',  sousTitre:'Leader entreprise', logo:'/logos/technova.jpg',  couleur:'#0066CC' },
-  { id:'agrinova',  nom:'AgriNOVA',  sousTitre:'Leader entreprise', logo:'/logos/agrinova.jpg',  couleur:'#15803D' },
-  { id:'tradenova', nom:'TradeNOVA', sousTitre:'Leader entreprise', logo:'/logos/tradenova.jpg', couleur:'#7E22CE' },
-  { id:'aquanova',  nom:'AquaNOVA',  sousTitre:'Leader entreprise', logo:'/logos/aquanova.jpg',  couleur:'#0369A1' },
+  { id:'innova',   nom:'In-NOVA',   sousTitre:'Bureau général du Club', logo:'/logos/innova.jpg',   couleur:'#0066CC',
+    hash:'9033a76da88bb61a486aa826401d31600b5c0a999b71bdad97e33858849d957b' },
+  { id:'technova',  nom:'TechNOVA',  sousTitre:'Leader entreprise', logo:'/logos/technova.jpg',  couleur:'#0066CC',
+    hash:'eb3349e9db57af87cc26562fe5a9d8355848ac21ecab35bafefc3b9a6edbfc3c' },
+  { id:'agrinova',  nom:'AgriNOVA',  sousTitre:'Leader entreprise', logo:'/logos/agrinova.jpg',  couleur:'#15803D',
+    hash:'8237843f9c315242db52a787309c09a4805b25cff123f613865cbef0d17023f3' },
+  { id:'tradenova', nom:'TradeNOVA', sousTitre:'Leader entreprise', logo:'/logos/tradenova.jpg', couleur:'#7E22CE',
+    hash:'629e8db834f13b2347b623869c7334f16e115b161bbbb8497e0ba07c0aaad767' },
+  { id:'aquanova',  nom:'AquaNOVA',  sousTitre:'Leader entreprise', logo:'/logos/aquanova.jpg',  couleur:'#0369A1',
+    hash:'f795ec94b976a5e80d53d95abded7ac7959a62d1ada5092ec3beb1a4117d9ee4' },
 ]
+// ATTENTION SECURITE : ces empreintes SHA-256 restent visibles dans le code source
+// (donc pas de vraie securite cryptographique) - c'est une barriere temporaire en
+// attendant le vrai backend. Phase 2 : remplacer entierement par une authentification
+// serveur (hash + sel, sessions/JWT, aucun secret expose au frontend).
 
 export default function Login({ onSuccess }) {
-  const [profil,   setProfil]   = useState(null)
-  const [email,    setEmail]    = useState('')
-  const [password, setPassword] = useState('')
-  const [errors,   setErrors]   = useState({})
-  const [showPass, setShowPass] = useState(false)
+  const [profil,     setProfil]     = useState(null)
+  const [email,      setEmail]      = useState('')
+  const [password,   setPassword]   = useState('')
+  const [errors,     setErrors]     = useState({})
+  const [showPass,   setShowPass]   = useState(false)
+  const [verifying,  setVerifying]  = useState(false)
 
-  const pass = validatePassword(password)
-  const strength = password ? passwordStrengthLabel(pass.score) : null
-
-  const soumettre = (ev) => {
+  const soumettre = async (ev) => {
     ev.preventDefault()
     const err = {}
     if (!isValidEmail(email)) err.email = 'Email invalide'
     if (!password.trim())     err.password = 'Mot de passe requis'
     if (Object.keys(err).length > 0) { setErrors(err); return }
+
+    setVerifying(true)
+    const empreinte = await sha256Hex(password)
+    setVerifying(false)
+
+    if (empreinte !== profil.hash) {
+      setErrors({ password: 'Email ou mot de passe incorrect.' })
+      return
+    }
     // TODO Phase 2 : POST /api/admin/login/ { profil: profil.id, email, password }
+    // -> remplacer entierement cette verification par une authentification serveur
     onSuccess(profil.id)
   }
 
@@ -64,7 +81,8 @@ export default function Login({ onSuccess }) {
   return (
     <main className="min-h-screen bg-slate-50 pt-16 flex items-center justify-center px-4">
       <Reveal className="w-full max-w-sm">
-        <button onClick={() => setProfil(null)} className="text-slate-400 hover:text-slate-600 text-xs mb-4 flex items-center gap-1.5">
+        <button onClick={() => { setProfil(null); setPassword(''); setErrors({}) }}
+          className="text-slate-400 hover:text-slate-600 text-xs mb-4 flex items-center gap-1.5">
           <ArrowLeft size={13} /> Changer de profil
         </button>
         <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm animate-bounce-in">
@@ -101,19 +119,19 @@ export default function Login({ onSuccess }) {
                 </button>
               </div>
               {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
-              {strength && (
-                <p className="text-xs mt-1 font-bold" style={{ color: strength.color }}>
-                  Solidité : {strength.label}
-                </p>
-              )}
             </div>
 
-            <button type="submit"
-              className="w-full py-3 rounded-xl text-white font-black text-sm transition-all hover:opacity-90 hover:shadow-md hover:-translate-y-0.5"
+            <button type="submit" disabled={verifying}
+              className="w-full py-3 rounded-xl text-white font-black text-sm transition-all hover:opacity-90 hover:shadow-md hover:-translate-y-0.5 disabled:opacity-60"
               style={{ background: profil.couleur }}>
-              Se connecter
+              {verifying ? 'Vérification...' : 'Se connecter'}
             </button>
           </form>
+
+          <div className="mt-5 flex items-start gap-2 text-[11px] text-slate-400 leading-relaxed">
+            <ShieldAlert size={13} className="flex-shrink-0 mt-0.5" />
+            Accès temporaire en attendant le backend : à remplacer par une authentification serveur.
+          </div>
         </div>
       </Reveal>
     </main>

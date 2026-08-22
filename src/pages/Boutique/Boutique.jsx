@@ -5,25 +5,27 @@ import Reveal from '../../components/Reveal'
 import { StarDisplay, StarPicker } from '../../components/StarRating'
 import { useToast } from '../../components/Toast'
 import PaiementKKiaPay from '../../components/PaiementKKiaPay'
+import { fusionnerContenu, ajouterContenu, modifierContenu, supprimerContenu } from '../../utils/contenu'
 
-const CONFIG = {
+export const CONFIG_BOUTIQUES = {
   technova:  { nom:'TechNOVA',  logo:'/logos/technova.jpg',  couleur:'#0066CC', bg:'#EFF6FF' },
   agrinova:  { nom:'AgriNOVA',  logo:'/logos/agrinova.jpg',  couleur:'#15803D', bg:'#F0FDF4' },
   tradenova: { nom:'TradeNOVA', logo:'/logos/tradenova.jpg', couleur:'#7E22CE', bg:'#FDF4FF' },
   aquanova:  { nom:'AquaNOVA',  logo:'/logos/aquanova.jpg',  couleur:'#0369A1', bg:'#F0F9FF' },
 }
+const CONFIG = CONFIG_BOUTIQUES
 
-// Catalogue par entreprise - Phase 2 : GET /api/boutiques/:id/produits/
-const PRODUITS = {
+// Catalogue par entreprise (donnees de base) - Phase 2 : GET /api/boutiques/:id/produits/
+const PRODUITS_BASE = {
   agrinova: [
     {
-      id: 1, type: 'produit', nom: 'Œufs de poules',
+      id: 'oeufs', type: 'produit', nom: 'Œufs de poules',
       photo: '/images/produits/agrinova-oeufs.jpg',
       prix: null, quantiteMin: '5 plateaux', enStock: false,
       descLongue: "Œufs de poules frais, issus de l'élevage AgriNOVA. Vente en gros, réservée aux commandes d'au moins 5 plateaux. Idéal pour les revendeurs, restaurants et boulangeries.",
     },
     {
-      id: 2, type: 'produit', nom: 'Asticots (vers) pour volailles',
+      id: 'asticots', type: 'produit', nom: 'Asticots (vers) pour volailles',
       photo: '/images/produits/agrinova-asticots.jpg',
       prix: '600 FCFA / kg — 13 000 FCFA le sac de 25 kg', quantiteMin: '5 kg', enStock: false,
       descLongue: "Asticots séchés riches en protéines, utilisés comme complément alimentaire pour volailles. Favorisent une croissance rapide et une meilleure ponte. Disponibles au kilo ou en sac de 25 kg.",
@@ -31,7 +33,7 @@ const PRODUITS = {
   ],
   technova: [
     {
-      id: 1, type: 'app', nom: 'MÉDIROS',
+      id: 'mediros', type: 'app', nom: 'MÉDIROS',
       photo: '/images/produits/technova-mediros.jpg',
       desc: 'Application numérique de régulation du secteur médical.',
       descLongue: "MÉDIROS est une application développée par TechNOVA pour digitaliser et faciliter la régulation du secteur médical : gestion des établissements de santé, suivi réglementaire et mise en relation avec les autorités compétentes.",
@@ -41,9 +43,27 @@ const PRODUITS = {
   aquanova: [],
 }
 
+const cleBoutique = (entrepriseId) => `innova_contenu_boutique_${entrepriseId}`
+
+export function getProduitsBoutique(entrepriseId) {
+  return fusionnerContenu(cleBoutique(entrepriseId), PRODUITS_BASE[entrepriseId] || [])
+}
+
+export function ajouterProduitBoutique(entrepriseId, donnees) {
+  return ajouterContenu(cleBoutique(entrepriseId), donnees)
+}
+
+export function modifierProduitBoutique(entrepriseId, id, updates) {
+  modifierContenu(cleBoutique(entrepriseId), id, updates)
+}
+
+export function supprimerProduitBoutique(entrepriseId, id) {
+  supprimerContenu(cleBoutique(entrepriseId), id)
+}
+
 export default function Boutique({ entrepriseId, onNavigate }) {
   const c = CONFIG[entrepriseId] || CONFIG.technova
-  const produits = PRODUITS[entrepriseId] || []
+  const produits = getProduitsBoutique(entrepriseId)
   const showToast = useToast()
   const [produitDetail,   setProduitDetail]   = useState(null)
   const [produitCommande, setProduitCommande] = useState(null)

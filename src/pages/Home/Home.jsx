@@ -1,7 +1,7 @@
 // src/pages/Home/Home.jsx
 import { Building2, Briefcase, HeartHandshake, Rocket, Sun, Trophy, Sprout, ArrowRight } from 'lucide-react'
-import { STATS, OPPORTUNITES } from '../../data/opportunites'
-import { PARTENAIRES } from '../Partenaires/Partenaires'
+import { STATS, getOpportunites } from '../../data/opportunites'
+import { getPartenaires } from '../Partenaires/Partenaires'
 import Reveal from '../../components/Reveal'
 import { useInView, useCountUp } from '../../hooks/useScrollAnimation'
 
@@ -65,6 +65,8 @@ function StatCard({ s, delay = 0 }) {
 }
 
 export default function Home({ onNavigate }) {
+  const OPPORTUNITES = getOpportunites()
+  const PARTENAIRES = getPartenaires()
   return (
     <main className="min-h-screen bg-slate-50 pt-16">
 

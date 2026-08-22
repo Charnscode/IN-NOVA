@@ -3,14 +3,13 @@ import { useState } from 'react'
 import { ArrowRight, ArrowLeft, Check, Store, Mail } from 'lucide-react'
 import Reveal from '../../components/Reveal'
 import { useToast } from '../../components/Toast'
+import { getProduitsBoutique } from '../Boutique/Boutique'
 
-// Produits publies par entreprise (Phase 2 : GET /api/boutiques/:id/produits/)
-// Rempli au fur et a mesure -> tant qu'une boutique est vide, le bouton affiche "Pas encore disponible"
-export const BOUTIQUE_DISPONIBLE = {
-  technova:  true,   // MEDIROS
-  agrinova:  true,   // Oeufs + Asticots
-  tradenova: false,  // produits digitaux a venir
-  aquanova:  false,
+// Une boutique est "disponible" (le bouton mene vers la page) des qu'elle a
+// au moins un produit publie (donnees de base + ajouts admin). Tant qu'elle
+// est vide, le bouton affiche "Pas encore disponible".
+function boutiqueDisponible(entrepriseId) {
+  return getProduitsBoutique(entrepriseId).length > 0
 }
 
 export const EMAILS_ENTREPRISES = {
@@ -177,7 +176,7 @@ function EntrepriseDetail({ e, onBack, onNavigate }) {
   const estMarket  = e.id === 'tradenova-market'
   const ctaLabel   = e.ctaLabel || 'Visiter notre boutique'
   const ctaPage    = e.ctaPage  || `boutique-${e.id}`
-  const disponible = e.ctaPage ? true : (BOUTIQUE_DISPONIBLE[e.id] ?? false)
+  const disponible = e.ctaPage ? true : (e.id ? boutiqueDisponible(e.id) : false)
   const email      = EMAILS_ENTREPRISES[e.id]
 
   const visiterBoutique = () => {

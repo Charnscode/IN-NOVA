@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { CalendarCheck, Target, HeartHandshake, Clock, Trophy } from 'lucide-react'
 import Reveal from '../../components/Reveal'
 import { sanitize, isValidEmail } from '../../utils/security'
+import { dejaSoumis, enregistrerSoumission } from '../../utils/registre'
 
 const CONDITIONS = [
   { Icon: CalendarCheck,  label: '18 à 35 ans',           desc: "Le Club est réservé aux jeunes adultes en phase de construction professionnelle." },
@@ -41,6 +42,11 @@ export default function Rejoindre() {
     if (!form.projet.trim())       err.projet     = 'Décrivez votre projet'
     if (!form.engagement.trim())   err.engagement = 'Décrivez votre engagement'
     if (Object.keys(err).length > 0) { setErrors(err); return }
+    if (dejaSoumis('innova_candidatures_rejoindre', form.email)) {
+      setErrors(x => ({ ...x, email: 'Vous avez déjà soumis une candidature avec cet email.' }))
+      return
+    }
+    enregistrerSoumission('innova_candidatures_rejoindre', form.email)
     setOk(true)
     // TODO Phase 2 : POST /api/membership/apply/ { ...form }
     // + email a clubinnova08@gmail.com

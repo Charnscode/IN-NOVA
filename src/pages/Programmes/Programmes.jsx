@@ -1,19 +1,24 @@
 // src/pages/Programmes/Programmes.jsx
 import { useState } from 'react'
-import { Rocket, Sun, Trophy, Sprout, Users, ArrowLeft, Check, Star, Lock, Images, Bell } from 'lucide-react'
+import { Rocket, Sun, Trophy, Sprout, Users, ArrowLeft, Check, Star, Lock, Images, Bell, Sparkles } from 'lucide-react'
 import Reveal from '../../components/Reveal'
+import { dejaSoumis, enregistrerSoumission } from '../../utils/registre'
+import { fusionnerContenu, ajouterContenu, modifierContenu, supprimerContenu } from '../../utils/contenu'
 
-const PROGRAMMES = [
+const CLE = 'innova_contenu_programmes'
+export const ICONES_PROGRAMMES = { rocket: Rocket, sun: Sun, trophy: Trophy, sprout: Sprout, sparkles: Sparkles }
+
+const PROGRAMMES_BASE = [
   {
     id: 'bootcamp',
     titre: 'In-NOVA Bootcamp',
-    Icon: Rocket,
+    icon: 'rocket',
     couleur: '#0066CC',
     bg: '#EFF6FF',
     realise: true,
     affiche: '/images/bootcamp-2026.jpg',
     dateRealisee: '15 juin 2026 — Abomey-Calavi',
-    inscriptionsOuvertes: true,
+    inscriptionsOuvertes: false,
     public: 'Étudiants, jeunes diplômés et porteurs de projets',
     desc: "Premier programme du Parcours Entrepreneurial In-NOVA. Formation intensive et immersive conçue pour préparer les jeunes aux exigences du monde professionnel et entrepreneurial : leadership, esprit d'initiative, gestion de projet et compréhension des réalités de l'entrepreneuriat.",
     objectifs: [
@@ -33,7 +38,7 @@ const PROGRAMMES = [
   {
     id: 'summer',
     titre: 'In-NOVA Summer',
-    Icon: Sun,
+    icon: 'sun',
     couleur: '#F59E0B',
     bg: '#FFFBEB',
     realise: false,
@@ -58,12 +63,12 @@ const PROGRAMMES = [
   {
     id: 'challenge',
     titre: 'In-NOVA Challenge',
-    Icon: Trophy,
+    icon: 'trophy',
     couleur: '#7E22CE',
     bg: '#FDF4FF',
     realise: false,
     affiche: null,
-    inscriptionsOuvertes: false,
+    inscriptionsOuvertes: true,
     public: "Jeunes entrepreneurs, étudiants et équipes en phase de démarrage",
     desc: "Programme phare du Parcours Entrepreneurial In-NOVA. Plus qu'un concours, c'est une plateforme de rencontre entre jeunes porteurs d'initiatives et les acteurs de l'écosystème : jury de professionnels, incubateurs, investisseurs et partenaires techniques.",
     objectifs: [
@@ -82,7 +87,7 @@ const PROGRAMMES = [
   {
     id: 'accompagnement',
     titre: "Programme d'Accompagnement",
-    Icon: Sprout,
+    icon: 'sprout',
     couleur: '#15803D',
     bg: '#F0FDF4',
     realise: false,
@@ -105,7 +110,25 @@ const PROGRAMMES = [
   },
 ]
 
+/** Liste des programmes a afficher (donnees de base + ajouts/modifs/suppressions admin). */
+export function getProgrammes() {
+  return fusionnerContenu(CLE, PROGRAMMES_BASE)
+}
+
+export function ajouterProgramme(donnees) {
+  return ajouterContenu(CLE, donnees)
+}
+
+export function modifierProgramme(id, updates) {
+  modifierContenu(CLE, id, updates)
+}
+
+export function supprimerProgramme(id) {
+  supprimerContenu(CLE, id)
+}
+
 export default function Programmes() {
+  const PROGRAMMES = getProgrammes()
   const [selected, setSelected] = useState(null)
 
   if (selected) {
@@ -129,7 +152,9 @@ export default function Programmes() {
 
       <section className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {PROGRAMMES.map((p, i) => (
+          {PROGRAMMES.map((p, i) => {
+            const IconProg = ICONES_PROGRAMMES[p.icon] || Sparkles
+            return (
             <Reveal key={p.id} delay={i * 90}>
               <article
                 className="bg-white rounded-2xl overflow-hidden border-2 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group h-full"
@@ -137,9 +162,11 @@ export default function Programmes() {
                 onClick={() => setSelected(p)}>
                 <div className="h-2" style={{ background: p.couleur }} />
                 <div className="p-6">
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 overflow-hidden"
                     style={{ background: p.bg }}>
-                    <p.Icon size={26} color={p.couleur} />
+                    {p.affiche
+                      ? <img src={p.affiche} alt={p.titre} className="w-full h-full object-cover" />
+                      : <IconProg size={26} color={p.couleur} />}
                   </div>
                   <h2 className="font-black text-slate-900 text-xl mb-2 group-hover:opacity-80"
                     style={{ fontFamily:'Arial, sans-serif', color: p.couleur }}>
@@ -164,7 +191,7 @@ export default function Programmes() {
                 </div>
               </article>
             </Reveal>
-          ))}
+          )})}
         </div>
       </section>
     </main>
@@ -172,6 +199,7 @@ export default function Programmes() {
 }
 
 function ProgrammeDetail({ programme: p, onBack }) {
+  const IconProg = ICONES_PROGRAMMES[p.icon] || Sparkles
   const [form,     setForm]     = useState({ nom:'', email:'', tel:'', motivation:'' })
   const [errors,   setErrors]   = useState({})
   const [inscrit,  setInscrit]  = useState(false)
@@ -183,6 +211,12 @@ function ProgrammeDetail({ programme: p, onBack }) {
     if (!form.email.trim()) err.email = 'Email requis'
     if (!form.tel.trim())   err.tel   = 'Téléphone requis'
     if (Object.keys(err).length > 0) { setErrors(err); return }
+    const cle = `innova_candidature_programme_${p.id}`
+    if (dejaSoumis(cle, form.email)) {
+      setErrors(x => ({ ...x, email: 'Vous avez déjà postulé à ce programme avec cet email.' }))
+      return
+    }
+    enregistrerSoumission(cle, form.email)
     setInscrit(true)
     // TODO Phase 2 : POST /api/programmes/apply/ { programme_id, ...form }
   }
@@ -197,7 +231,7 @@ function ProgrammeDetail({ programme: p, onBack }) {
             <ArrowLeft size={14} /> Retour aux programmes
           </button>
 
-          {p.realise && p.affiche ? (
+          {p.affiche ? (
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
               <div className="w-40 h-40 rounded-2xl overflow-hidden flex-shrink-0 border-4 border-white/20 shadow-xl">
                 <img src={p.affiche} alt={p.titre} className="w-full h-full object-cover" />
@@ -206,9 +240,13 @@ function ProgrammeDetail({ programme: p, onBack }) {
                 <h1 className="font-black text-white text-3xl" style={{ fontFamily:'Arial, sans-serif' }}>
                   {p.titre}
                 </h1>
-                <p className="text-white/70 text-sm mt-1">{p.dateRealisee}</p>
-                <span className="inline-flex items-center gap-1.5 bg-white/15 text-white text-[11px] font-black px-3 py-1.5 rounded-full mt-3">
-                  <Lock size={11} /> Candidatures fermées
+                {p.realise && <p className="text-white/70 text-sm mt-1">{p.dateRealisee}</p>}
+                {!p.realise && <p className="text-white/70 text-sm mt-1">{p.public}</p>}
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-black px-3 py-1.5 rounded-full mt-3"
+                  style={{ background: p.realise ? 'rgba(255,255,255,0.15)' : '#FCD603', color: p.realise ? '#FFFFFF' : '#001A4D' }}>
+                  {p.realise
+                    ? <><Lock size={11} /> Candidatures fermées</>
+                    : (p.inscriptionsOuvertes ? 'Inscriptions ouvertes' : 'Inscriptions non ouvertes')}
                 </span>
               </div>
             </div>
@@ -216,7 +254,7 @@ function ProgrammeDetail({ programme: p, onBack }) {
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0"
                 style={{ background:'rgba(255,255,255,0.15)' }}>
-                <p.Icon size={30} color="#FFFFFF" />
+                <IconProg size={30} color="#FFFFFF" />
               </div>
               <div>
                 <h1 className="font-black text-white text-3xl" style={{ fontFamily:'Arial, sans-serif' }}>

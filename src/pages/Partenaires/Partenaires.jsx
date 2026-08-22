@@ -1,12 +1,32 @@
 // src/pages/Partenaires/Partenaires.jsx
 import { Handshake, Mail, Users } from 'lucide-react'
 import Reveal from '../../components/Reveal'
+import { fusionnerContenu, ajouterContenu, modifierContenu, supprimerContenu } from '../../utils/contenu'
 
-// Aucun partenaire officiel confirme pour le moment
+const CLE = 'innova_contenu_partenaires'
+
+// Aucun partenaire officiel confirme pour le moment (donnees de base)
 // Phase 2 : GET /api/partenaires/
-export const PARTENAIRES = []
+const PARTENAIRES_BASE = []
+
+export function getPartenaires() {
+  return fusionnerContenu(CLE, PARTENAIRES_BASE)
+}
+
+export function ajouterPartenaire(donnees) {
+  return ajouterContenu(CLE, donnees)
+}
+
+export function modifierPartenaire(id, updates) {
+  modifierContenu(CLE, id, updates)
+}
+
+export function supprimerPartenaire(id) {
+  supprimerContenu(CLE, id)
+}
 
 export default function Partenaires() {
+  const PARTENAIRES = getPartenaires()
   return (
     <main className="min-h-screen bg-slate-50 pt-16">
       <header style={{ background:'linear-gradient(135deg, #0A1F5C 0%, #0055BB 100%)' }}
