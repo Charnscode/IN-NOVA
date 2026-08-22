@@ -7,7 +7,7 @@ const CLE = 'innova_contenu_opportunites'
 export const OPPORTUNITES_BASE = [
   {
     id:       1,
-    type:     "Appel à projets",
+    type:     "Evenementiel",
     titre:    "SIALO 2026 - Salon international de l'Agriculture",
     org:      "SIALO Togo",
     lieu:     "CETEF, Lomé, Togo 2000",
@@ -24,7 +24,7 @@ export const OPPORTUNITES_BASE = [
   },
   {
     id:       2,
-    type:     "Appel à projets",
+    type:     "Evenementiel",
     titre:    "Investir dans la ferme avicole SIALO",
     org:      "SIALO Togo",
     lieu:     "CETEF, Lomé, Togo 2000",
@@ -139,7 +139,7 @@ export const TYPE_STYLES = {
   "Emploi":          { bg: "#EFF6FF", text: "#1D4ED8", border: "#1D4ED8" },
   "Stage":           { bg: "#FFF7ED", text: "#C2410C", border: "#C2410C" },
   "Financement":     { bg: "#F0FDF4", text: "#15803D", border: "#15803D" },
-  "Subvention":      { bg: "#FDF4FF", text: "#7E22CE", border: "#7E22CE" },
+  "Evenementiel":      { bg: "#FDF4FF", text: "#7E22CE", border: "#7E22CE" },
   "Appel à projets": { bg: "#FFFBEB", text: "#B45309", border: "#B45309" },
   "Volontariat":     { bg: "#F0F9FF", text: "#0369A1", border: "#0369A1" },
   "Formation":       { bg: "#ECFEFF", text: "#0E7490", border: "#0E7490" },
